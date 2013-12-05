@@ -11,6 +11,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     // now it's my code
+    startAction = new QAction(QIcon(":/image/tool-start"),tr("&Start"),this);
 
 }
 
