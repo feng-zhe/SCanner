@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "supervisor.h"
 #include <QAction>
 #include <QMenuBar>
 #include <QToolBar>
@@ -8,7 +9,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    supvisor(new Supervisor(this))
 {
     ui->setupUi(this);
     // now it's my code
@@ -28,7 +30,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::start()
 {
-    QMessageBox::information(NULL, "Title", "licked!", QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+    supvisor->start();
 }
 
 MainWindow::~MainWindow()

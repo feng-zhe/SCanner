@@ -13,11 +13,20 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    icmpsender.cpp \
+    supervisor.cpp \
+    icmpsniffer.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    icmpsender.h \
+    defines.h \
+    supervisor.h \
+    icmpsniffer.h
 
 FORMS    += mainwindow.ui
 
 RESOURCES += \
     res.qrc
+
+LIBS += -lnet

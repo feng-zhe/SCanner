@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "supervisor.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,6 +22,7 @@ private:
 private:
     Ui::MainWindow *ui;
     QAction *startAction;
+    Supervisor *supvisor;   // supervisor who control the procedure of scanning
 };
 
 #endif // MAINWINDOW_H
