@@ -30,3 +30,4 @@ RESOURCES += \
     res.qrc
 
 LIBS += -lnet
+LIBS += -L/usr/local/lib -lpcap

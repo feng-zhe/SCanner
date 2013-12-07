@@ -5,12 +5,9 @@
 #include <QMenuBar>
 #include <QToolBar>
 #include <QStatusBar>
-#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    supvisor(new Supervisor(this))
+    QMainWindow(parent),ui(new Ui::MainWindow),supvisor(new Supervisor(this)),rowCount(0)
 {
     ui->setupUi(this);
     // now it's my code
@@ -24,13 +21,27 @@ MainWindow::MainWindow(QWidget *parent) :
     toolBar->addAction(startAction);
     this->statusBar();
 
-    // connect buttons and slots
+    // set tableWidget
+    ui->tableResult->setColumnCount(3);
+    ui->tableResult->setRowCount(rowCount);
+    QStringList headers;
+    headers << "IP" << "PORT" << "PROTOCOL";
+    ui->tableResult->setHorizontalHeaderLabels(headers);
+
+    // connect signals and slots
     connect(this->ui->buttonStart,&QPushButton::clicked,this,&MainWindow::start);
+    connect(this->supvisor,&Supervisor::pingFounded,this,&MainWindow::addTableItem);
 }
 
 void MainWindow::start()
 {
     supvisor->start();
+
+}
+
+void MainWindow::addTableItem(unsigned int ip, unsigned short icmpID, unsigned short ipID)
+{
+    return;
 }
 
 MainWindow::~MainWindow()
