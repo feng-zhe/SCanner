@@ -9,6 +9,6 @@ ICMPSniffer::ICMPSniffer(const QList<IPID_Info> *info, QObject *parent) :
 
 void ICMPSniffer::run()
 {
-
+    // now let's make some difference!
     return;
 }
