@@ -14,7 +14,7 @@ protected:
     void run();
 
 signals:
-    void pingFounded(unsigned int ip, unsigned short icmpID, unsigned short ipID);
+    void pingFounded(unsigned int ip, unsigned short port, unsigned short protocol);
     
 public slots:
     

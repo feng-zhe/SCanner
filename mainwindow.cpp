@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "supervisor.h"
+#include "defines.h"
 #include <QAction>
 #include <QMenuBar>
 #include <QToolBar>
@@ -28,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent) :
     headers << "IP" << "PORT" << "PROTOCOL";
     ui->tableResult->setHorizontalHeaderLabels(headers);
 
+
     // connect signals and slots
     connect(this->ui->buttonStart,&QPushButton::clicked,this,&MainWindow::start);
     connect(this->supvisor,&Supervisor::pingFounded,this,&MainWindow::addTableItem);
@@ -36,11 +38,41 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::start()
 {
     supvisor->start();
-
 }
 
-void MainWindow::addTableItem(unsigned int ip, unsigned short icmpID, unsigned short ipID)
+void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned short protocol)
 {
+    // make an alias for convinience
+    QTableWidget * (&table) = this->ui->tableResult;
+    // add the rowCount
+    this->rowCount++;
+    // dynamically set the rowCount
+    table->setRowCount(rowCount);
+    unsigned char *p = (unsigned char*)&ip;
+    QString ipStr = QString::number(uint(*p))+"."+
+            QString::number(uint(*(p+1)))+"."+
+            QString::number(uint(*(p+2)))+"."+
+            QString::number(uint(*(p+3)));
+    QString portStr = QString::number(port);
+    QString protoStr;
+    switch (protocol)
+    {
+    case PROTOCOL_ICMP:
+        protoStr="ICMP";
+        portStr = "NULL";
+        break;
+    case PROTOCOL_TCP_C:
+    case PROTOCOL_TCP_S:
+    case PROTOCOL_TCP_F:
+        protoStr="TCP";
+        break;
+    default:
+        break;
+    }
+    // add it to the table widget
+    table->setItem(rowCount-1, 0, new QTableWidgetItem(ipStr));
+    table->setItem(rowCount-1, 1, new QTableWidgetItem(portStr));
+    table->setItem(rowCount-1, 2, new QTableWidgetItem(protoStr));
     return;
 }
 

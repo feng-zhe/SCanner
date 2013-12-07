@@ -1,21 +1,12 @@
 #include "icmpsniffer.h"
-#include "defines.h"
 #include <libnet.h>
 #include <netinet/in.h> // for big endian to little endian
 #include <pcap.h>
 #include <QMessageBox> // for debug
 
-ICMPSniffer::ICMPSniffer(QObject *parent) :
-    QThread(parent)
+ICMPSniffer::ICMPSniffer(const QList<IPID_Info> *info,QObject *parent) :
+    QThread(parent),m_info(*info)
 {
-}
-
-// initialize the static variable
-QList<IPID_Info> ICMPSniffer::m_info=QList<IPID_Info>();
-
-void ICMPSniffer::setInfo(const QList<IPID_Info> *info)
-{
-    m_info.append(*info);
 }
 
 void ICMPSniffer::run()
@@ -79,11 +70,13 @@ void ICMPSniffer::callBack(u_char *args, const pcap_pkthdr *header, const u_char
     unsigned short ipID = ntohs(ip->ip_id);
     unsigned short icmpID = ntohs((icmp->hun).echo.id);
 
-    QList<IPID_Info>::const_iterator start=m_info.constBegin(), last=m_info.constEnd();
+    QList<IPID_Info>::iterator start=pointer->m_info.begin(), last=pointer->m_info.end();
     while(start!=last){
         // check if the response is corresponding to my ping
         if((*start).ip==ipSource && (*start).IPid==ipID && (*start).ICMPid==icmpID){
-            pointer->emitPingFounded(ipSource,icmpID,ipID);
+            pointer->emitPingFounded(ipSource,0,PROTOCOL_ICMP);
+            pointer->m_info.erase(start);    // to avoid the duplicate table row same icmp response
+            break;
         }
         ++start;
     }
@@ -91,7 +84,7 @@ void ICMPSniffer::callBack(u_char *args, const pcap_pkthdr *header, const u_char
 }
 
 
-void ICMPSniffer::emitPingFounded(unsigned int ip, unsigned short icmpID, unsigned short ipID)
+void ICMPSniffer::emitPingFounded(unsigned int ip, unsigned short port, unsigned short protocol)
 {
-    emit pingFound(ip,icmpID,ipID);
+    emit pingFound(ip,port,protocol);
 }

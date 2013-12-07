@@ -15,13 +15,12 @@ void Supervisor::run()
 {
     // TO DO: now we just test the IP and id's
     QList<IPID_Info> pdinfo;
-    // ip address is in network endain,ids are in host endian
+    // ip address is in network endain,other ids are in host endian
+    // make the task info list
     pdinfo.push_back(IPID_Info({1306151799,2013,2014}));
-    // create the ping sender
+    // create the ping sender and receiver
     ICMPSender icmpSend(&pdinfo);
-    // create the ping receiver
-    ICMPSniffer icmpSniff;
-    icmpSniff.setInfo(&pdinfo);
+    ICMPSniffer icmpSniff(&pdinfo);
     // connect the signals because the main windows can only notice supervisor's signals
     connect(&icmpSniff,&ICMPSniffer::pingFound,this,&Supervisor::pingFounded);
     // start the sniffer first

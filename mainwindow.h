@@ -18,7 +18,7 @@ public:
 
 public slots:
     void start();
-    void addTableItem(unsigned int ip, unsigned short icmpID, unsigned short ipID);
+    void addTableItem(unsigned int ip, unsigned short port, unsigned short protocol);
     
 private:
     Ui::MainWindow *ui;

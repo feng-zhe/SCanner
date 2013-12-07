@@ -9,8 +9,8 @@ class ICMPSniffer : public QThread
 {
     Q_OBJECT
 public:
-    explicit ICMPSniffer(QObject *parent = 0);
-    void setInfo(const QList<IPID_Info> *info);
+    explicit ICMPSniffer(const QList<IPID_Info> *info,QObject *parent = 0);
+   // void setInfo(const QList<IPID_Info> *info);
 
 protected:
     void run();
@@ -19,13 +19,13 @@ private:
     static void callBack(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
 
 signals:
-    void pingFound(unsigned int ip,unsigned short icmpID,unsigned short ipID);
+    void pingFound(unsigned int ip, unsigned short port, unsigned short protocol);
     
 public slots:
-    void emitPingFounded(unsigned int ip,unsigned short icmpID,unsigned short ipID);
+    void emitPingFounded(unsigned int ip, unsigned short port, unsigned short protocol);
 
 private:
-   static QList<IPID_Info> m_info;  // this member is copy of the arg of setInfo
+    QList<IPID_Info> m_info;  // this member is copy of the arg of setInfo
     
 };
 
