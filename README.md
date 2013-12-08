@@ -12,3 +12,7 @@ Have fun!
 =========
 
 The project is still not ready to run.Please wait.
+
+=========
+12.8
+	Now all the scanning functions can work together well. The rest of the works is interacting with GUI, which is just a piece of cake!
