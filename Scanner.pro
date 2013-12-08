@@ -18,14 +18,18 @@ SOURCES += main.cpp\
     icmpsender.cpp \
     supervisor.cpp \
     icmpsniffer.cpp \
-    tcpconnecter.cpp
+    tcpconnecter.cpp \
+    tcpsfsender.cpp \
+    tcpssniffer.cpp
 
 HEADERS  += mainwindow.h \
     icmpsender.h \
     defines.h \
     supervisor.h \
     icmpsniffer.h \
-    tcpconnecter.h
+    tcpconnecter.h \
+    tcpsfsender.h \
+    tcpssniffer.h
 
 FORMS    += mainwindow.ui
 

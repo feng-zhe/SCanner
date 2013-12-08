@@ -10,7 +10,6 @@ class ICMPSniffer : public QThread
     Q_OBJECT
 public:
     explicit ICMPSniffer(const QList<IPID_Info> *info,QObject *parent = 0);
-   // void setInfo(const QList<IPID_Info> *info);
 
 protected:
     void run();

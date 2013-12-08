@@ -1,5 +1,6 @@
 #include "icmpsniffer.h"
 #include <libnet.h>
+#include <QList>
 #include <netinet/in.h> // for big endian to little endian
 #include <pcap.h>
 #include <QMessageBox> // for debug

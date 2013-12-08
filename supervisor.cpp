@@ -3,6 +3,8 @@
 #include "icmpsender.h"
 #include "icmpsniffer.h"
 #include "tcpconnecter.h"
+#include "tcpsfsender.h"
+#include "tcpssniffer.h"
 #include <libnet.h>
 #include <QList>
 #include <QDebug>
@@ -36,6 +38,7 @@ void Supervisor::run()
     }
 
     // ***************the tcp connect part********************
+    // TODO: for debug
     QList<TCP_Info> tcpList;
     TCP_Info temp;
     temp.ip = 1306151799;
@@ -43,6 +46,8 @@ void Supervisor::run()
     temp.port = 80;
     temp.seq = 100;
     tcpList.push_back(temp);
+    // TO DO: for the debug
+    if(0){
     TCPConnecter *threadPool[5];
     while(true){
         QList<TCP_Info>::Iterator start=tcpList.begin(),last=tcpList.end();
@@ -64,12 +69,33 @@ void Supervisor::run()
             --j;
             threadPool[j]->start();
             threadPool[j]->wait(1000);
+            disconnect(threadPool[j],&TCPConnecter::tcpcFounded,this,&Supervisor::Founded);
             threadPool[j]->exit();
             delete threadPool[j];
         }
         // remove the task we've dealed from list
         tcpList.erase(tcpList.begin(),start);
     }
+    }
+
+    // ***************the tcp SYN part********************
+    TCP_SF_Sender tcp_sf_sender(&tcpList,PROTOCOL_TCP_S);
+    TCP_S_Sniffer tcp_s_sniffer(&tcpList);
+    connect(&tcp_s_sniffer,&TCP_S_Sniffer::tcp_s_founded,this,&Supervisor::Founded);
+    tcp_s_sniffer.start();
+    tcp_sf_sender.start();
+    tcp_sf_sender.wait(1000);
+    tcp_s_sniffer.wait(1000);
+    tcp_s_sniffer.stop();
+    this->msleep(500);  //wait for the sniffer thread's stop
+    if(tcp_sf_sender.isRunning())
+        tcp_sf_sender.exit();
+    if(tcp_s_sniffer.isRunning())
+        tcp_s_sniffer.exit();
+
+
+
+    // ***************the tcp FIN part********************
 
     return;
 }
