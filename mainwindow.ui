@@ -132,6 +132,34 @@
          </layout>
         </item>
         <item>
+         <widget class="QCheckBox" name="checkBoxICMP">
+          <property name="text">
+           <string>ICMP TEST</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxTCPC">
+          <property name="text">
+           <string>TCP CONNECT</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxTCPS">
+          <property name="text">
+           <string>TCP SYN</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxTCPF">
+          <property name="text">
+           <string>TCP FIN</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <spacer name="verticalSpacer">
           <property name="orientation">
            <enum>Qt::Vertical</enum>

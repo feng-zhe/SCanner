@@ -17,5 +17,13 @@ typedef struct _IPID_Info{
     unsigned short IPid;
 } IPID_Info;
 
+// the struct contain informations of IP,ID,PORT,SEQ when TCP
+typedef struct _TCP_Info{
+    unsigned int ip;
+    unsigned short ipID;
+    unsigned short port;
+    unsigned int seq;
+} TCP_Info;
+
 
 #endif // DEFINES_H

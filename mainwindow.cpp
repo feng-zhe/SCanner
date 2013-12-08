@@ -29,10 +29,9 @@ MainWindow::MainWindow(QWidget *parent) :
     headers << "IP" << "PORT" << "PROTOCOL";
     ui->tableResult->setHorizontalHeaderLabels(headers);
 
-
     // connect signals and slots
     connect(this->ui->buttonStart,&QPushButton::clicked,this,&MainWindow::start);
-    connect(this->supvisor,&Supervisor::pingFounded,this,&MainWindow::addTableItem);
+    connect(this->supvisor,&Supervisor::Founded,this,&MainWindow::addTableItem);
 }
 
 void MainWindow::start()

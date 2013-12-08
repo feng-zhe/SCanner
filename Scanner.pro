@@ -5,6 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui
+QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,13 +17,15 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     icmpsender.cpp \
     supervisor.cpp \
-    icmpsniffer.cpp
+    icmpsniffer.cpp \
+    tcpconnecter.cpp
 
 HEADERS  += mainwindow.h \
     icmpsender.h \
     defines.h \
     supervisor.h \
-    icmpsniffer.h
+    icmpsniffer.h \
+    tcpconnecter.h
 
 FORMS    += mainwindow.ui
 

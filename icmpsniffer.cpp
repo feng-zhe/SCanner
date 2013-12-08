@@ -36,7 +36,7 @@ void ICMPSniffer::run()
 
     /* compile the filter expression */
     struct bpf_program fp;			/* compiled filter program (expression) */
-    char filter_exp[] = "icmp and ip dst 10.187.247.7";
+    char filter_exp[] = "icmp";
     if (pcap_compile(handle, &fp, filter_exp, 0, net) == -1)
         return;
 

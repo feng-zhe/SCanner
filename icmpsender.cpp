@@ -16,6 +16,7 @@ void ICMPSender::run()
     while( begin!=end ){
         IPID_Info info = *begin;
         this->ping(info.ip,info.ICMPid,info.IPid,5);
+        this->sleep(200);
         ++begin;
     }
     return;
