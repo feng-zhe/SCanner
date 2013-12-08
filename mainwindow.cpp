@@ -61,9 +61,13 @@ void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned sho
         portStr = "NULL";
         break;
     case PROTOCOL_TCP_C:
+        protoStr="TCP_C";
+        break;
     case PROTOCOL_TCP_S:
+        protoStr="TCP_S";
+        break;
     case PROTOCOL_TCP_F:
-        protoStr="TCP";
+        protoStr="TCP_F";
         break;
     default:
         break;

@@ -13,7 +13,20 @@ void TCP_SF_Sender::run()
             last = m_info->constEnd();
     while( start!=last ){
         TCP_Info temp=*start;
-        this->tcpSF(temp.ip,temp.port,temp.seq,m_protocol,temp.ipID);
+        uint ctrl;
+        switch(m_protocol)
+        {
+        case PROTOCOL_TCP_S :
+            ctrl=TH_SYN;
+            break;
+        case PROTOCOL_TCP_F:
+            ctrl=TH_FIN;
+            break;
+        default:
+            break;
+        }
+
+        this->tcpSF(temp.ip,temp.port,temp.seq,ctrl,temp.ipID);
         this->msleep(100);
         ++start;
     }

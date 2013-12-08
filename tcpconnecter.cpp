@@ -13,7 +13,7 @@ void TCPConnecter::run()
 {
     QTcpSocket client;
     client.connectToHost(QHostAddress(ntohl(m_info.ip)),m_info.port);
-    if(client.waitForConnected(1000))
+    if(client.waitForConnected(500))
         emit tcpcFounded(m_info.ip,m_info.port,PROTOCOL_TCP_C);
     return;
 }

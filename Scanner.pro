@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     icmpsniffer.cpp \
     tcpconnecter.cpp \
     tcpsfsender.cpp \
-    tcpssniffer.cpp
+    tcpssniffer.cpp \
+    tcp_f_sniffer.cpp
 
 HEADERS  += mainwindow.h \
     icmpsender.h \
@@ -29,7 +30,8 @@ HEADERS  += mainwindow.h \
     icmpsniffer.h \
     tcpconnecter.h \
     tcpsfsender.h \
-    tcpssniffer.h
+    tcpssniffer.h \
+    tcp_f_sniffer.h
 
 FORMS    += mainwindow.ui
 
