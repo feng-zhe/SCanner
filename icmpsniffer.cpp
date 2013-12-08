@@ -6,8 +6,13 @@
 #include <QMessageBox> // for debug
 
 ICMPSniffer::ICMPSniffer(const QList<IPID_Info> *info,QObject *parent) :
-    QThread(parent),m_info(*info)
+    QThread(parent),m_info(*info),m_stop(false)
 {
+}
+
+void ICMPSniffer::stop()
+{
+    m_stop = true;
 }
 
 void ICMPSniffer::run()
@@ -45,8 +50,36 @@ void ICMPSniffer::run()
     if (pcap_setfilter(handle, &fp) == -1)
         return;
 
-    /* now we can set our callback function and start the loop */
-    pcap_loop(handle,-1, callBack, (u_char*)this);
+    /* now we can start capturing packets */
+    struct pcap_pkthdr header;	/* The header that pcap gives us */
+    const struct libnet_ethernet_hdr *ethernet; /* The ethernet header */
+    const struct libnet_ipv4_hdr *ip; /* The IP header */
+    const struct libnet_icmpv4_hdr *icmp; /* The ICMP header */
+    const u_char *packet;   // the actual packet we picked
+    u_int size_ip;
+    while(!m_stop){
+        packet = pcap_next(handle,&header);
+        if( NULL==packet )
+            continue;
+        ethernet = (struct libnet_ethernet_hdr*)(packet);
+        ip = (struct libnet_ipv4_hdr*)(packet + LIBNET_ETH_H);
+        size_ip = IP_SIZE(ip);
+        icmp = (struct libnet_icmpv4_hdr*)(packet + LIBNET_ETH_H + size_ip);
+        unsigned int ipSource = ip->ip_src.s_addr;
+        unsigned short ipID = ntohs(ip->ip_id);
+        unsigned short icmpID = ntohs(icmp->hun.echo.id);
+        // check whether the packet is corresponding to our sender
+        QList<IPID_Info>::iterator start=m_info.begin(), last=m_info.end();
+        while(start!=last){
+            // check if the response is corresponding to my ping
+            if((*start).ip==ipSource && (*start).IPid==ipID && (*start).ICMPid==icmpID){
+                emit pingFounded(ipSource,0,PROTOCOL_ICMP);
+                m_info.erase(start);    // to avoid the duplicate table row same icmp response
+                break;
+            }
+            ++start;
+        }
+    }
 
     /* cleanup */
     pcap_freecode(&fp);
@@ -87,5 +120,5 @@ void ICMPSniffer::callBack(u_char *args, const pcap_pkthdr *header, const u_char
 
 void ICMPSniffer::emitPingFounded(unsigned int ip, unsigned short port, unsigned short protocol)
 {
-    emit pingFound(ip,port,protocol);
+    emit pingFounded(ip,port,protocol);
 }

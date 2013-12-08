@@ -18,23 +18,33 @@ void Supervisor::run()
 {
     // ***************First : the ping part******************
     // TO DO: for debug
-    if(0){
+    if(1){
     // TO DO: now we just test the IP and id's
     QList<IPID_Info> pdinfo;
     // ip address is in network endain,other ids are in host endian
     // make the task info list
-    pdinfo.push_back(IPID_Info({1306151799,2013,2014}));
+    IPID_Info pdTemp;
+    pdTemp.ip = 1306151799;
+    pdTemp.ICMPid = 2013;
+    pdTemp.IPid = 2014;
+    pdinfo.push_back(pdTemp);
     // create the ping sender and receiver
     ICMPSender icmpSend(&pdinfo);
     ICMPSniffer icmpSniff(&pdinfo);
     // connect the signals because the main windows can only notice supervisor's signals
-    connect(&icmpSniff,&ICMPSniffer::pingFound,this,&Supervisor::Founded);
+    connect(&icmpSniff,&ICMPSniffer::pingFounded,this,&Supervisor::Founded);
     // start the sniffer first
     icmpSniff.start();
     icmpSend.start();
     icmpSend.wait();
-    icmpSniff.wait(2000);
-    icmpSniff.quit();
+    icmpSniff.wait(1000);
+    // ask sniffer stop(or it gonna runs forever
+    icmpSniff.stop();
+    // wait until the threads stopped
+    while(icmpSend.isRunning())
+        icmpSend.wait(100);
+    while(icmpSniff.isRunning())
+        icmpSniff.wait(100);
     }
 
     // ***************the tcp connect part********************
@@ -89,12 +99,13 @@ void Supervisor::run()
     tcp_sf_sender_s.start();
     tcp_sf_sender_s.wait(1000);
     tcp_s_sniffer.wait(2000);
+    // ask threads to stop
     tcp_s_sniffer.stop();
-    this->msleep(500);  //wait for the sniffer thread's stop
-    if(tcp_sf_sender_s.isRunning())
-        tcp_sf_sender_s.exit();
-    if(tcp_s_sniffer.isRunning())
-        tcp_s_sniffer.exit();
+    // wait them until they stopped
+    while(tcp_sf_sender_s.isRunning())
+        tcp_sf_sender_s.wait(100);
+    while(tcp_s_sniffer.isRunning())
+        tcp_s_sniffer.wait(100);
     }
 
     // ***************the tcp FIN part********************
@@ -106,12 +117,15 @@ void Supervisor::run()
     tcp_sf_sender_f.start();
     tcp_sf_sender_f.wait(1000);
     tcp_f_sniffer.wait(2000);
+    // ask threads to stop
     tcp_f_sniffer.stop();
-    this->msleep(1000);  //wait for the sniffer thread's stop,need longer because the sendResult()
-    if(tcp_sf_sender_f.isRunning())
-        tcp_sf_sender_f.exit();
-    if(tcp_f_sniffer.isRunning())
-        tcp_f_sniffer.exit();\
+    while(tcp_sf_sender_f.isRunning())
+        tcp_sf_sender_f.wait(100);
+    while(tcp_f_sniffer.isRunning())
+        //wait for the sniffer thread's stop.it's longer because the sendResult()
+        tcp_f_sniffer.wait(100);
     }
+
+    //*************** over ****************
     return;
 }
