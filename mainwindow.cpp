@@ -8,35 +8,53 @@
 #include <QStatusBar>
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),ui(new Ui::MainWindow),supvisor(new Supervisor(this)),rowCount(0)
+    QMainWindow(parent),ui(new Ui::MainWindow),m_rowCount(0),m_supvisor(new Supervisor(this))
 {
     ui->setupUi(this);
-    // now it's my code
-    // set menubar, toolbar and statusbar
-    startAction = new QAction(QIcon(":/images/tool-start"),tr("&Start"),this);
-    startAction->setStatusTip(tr("Start a new SCanner"));
-    connect(startAction, &QAction::triggered, this, &MainWindow::start);
-    QMenu *menu = this->menuBar()->addMenu(tr("Settings"));
-    menu->addAction(startAction);
-    QToolBar *toolBar = this->addToolBar(tr("Shortcuts"));
-    toolBar->addAction(startAction);
-    this->statusBar();
+    m_menu = this->menuBar()->addMenu(tr("Settings")); // create the menu bar
+    m_toolBar = this->addToolBar(tr("Shortcuts")); // create the tool bar
+    this->statusBar();  // create status bar
+    // set the actions
+    // start action
+    m_startAction = new QAction(QIcon(":/images/tool-start"),tr("St&art"),this);
+    m_startAction->setStatusTip(tr("Start a new SCanning"));
+    m_menu->addAction(m_startAction);
+    m_toolBar->addAction(m_startAction);
+    // stop action
+    m_stopAction = new QAction(QIcon(":/images/tool-stop"),tr("St&op"),this);
+    m_stopAction->setStatusTip(tr("Stop SCanning"));
+    m_menu->addAction(m_stopAction);
+    m_toolBar->addAction(m_stopAction);
 
     // set tableWidget
     ui->tableResult->setColumnCount(3);
-    ui->tableResult->setRowCount(rowCount);
+    ui->tableResult->setRowCount(m_rowCount);
     QStringList headers;
     headers << "IP" << "PORT" << "PROTOCOL";
     ui->tableResult->setHorizontalHeaderLabels(headers);
 
-    // connect signals and slots
-    connect(this->ui->buttonStart,&QPushButton::clicked,this,&MainWindow::start);
-    connect(this->supvisor,&Supervisor::Founded,this,&MainWindow::addTableItem);
+    /* connect signals and slots */
+    //action to startScan and supervisor::stop
+    connect(m_startAction, &QAction::triggered, this, &MainWindow::startScan);
+    connect(m_stopAction, &QAction::triggered, m_supvisor, &Supervisor::stop);
+    //buttonStart to startScan
+    connect(this->ui->buttonStart,&QPushButton::clicked,this,&MainWindow::startScan);
+    //Found to addTableItem
+    connect(this->m_supvisor,&Supervisor::Founded,this,&MainWindow::addTableItem);
+    // signals between MainWindows and supvisor
+    connect(this->ui->buttonStop,&QPushButton::clicked,this->m_supvisor,&Supervisor::stop);// stop
+    connect(this->m_supvisor,&Supervisor::signal_start,this,&MainWindow::lockInput);  // lock input
+    connect(this->m_supvisor,&Supervisor::signal_done,this,&MainWindow::freeInput);   // free input
 }
 
-void MainWindow::start()
+void MainWindow::startScan()
 {
-    supvisor->start();
+    // initialize member variables of supvisor
+    m_supvisor->m_bICMP=this->ui->checkBoxICMP->isChecked();
+    m_supvisor->m_bTCP_C=this->ui->checkBoxTCPC->isChecked();
+    m_supvisor->m_bTCP_S=this->ui->checkBoxTCPS->isChecked();
+    m_supvisor->m_bTCP_F=this->ui->checkBoxTCPF->isChecked();
+    m_supvisor->start();
 }
 
 void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned short protocol)
@@ -44,9 +62,9 @@ void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned sho
     // make an alias for convinience
     QTableWidget * (&table) = this->ui->tableResult;
     // add the rowCount
-    this->rowCount++;
+    this->m_rowCount++;
     // dynamically set the rowCount
-    table->setRowCount(rowCount);
+    table->setRowCount(m_rowCount);
     unsigned char *p = (unsigned char*)&ip;
     QString ipStr = QString::number(uint(*p))+"."+
             QString::number(uint(*(p+1)))+"."+
@@ -73,13 +91,42 @@ void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned sho
         break;
     }
     // add it to the table widget
-    table->setItem(rowCount-1, 0, new QTableWidgetItem(ipStr));
-    table->setItem(rowCount-1, 1, new QTableWidgetItem(portStr));
-    table->setItem(rowCount-1, 2, new QTableWidgetItem(protoStr));
+    table->setItem(m_rowCount-1, 0, new QTableWidgetItem(ipStr));
+    table->setItem(m_rowCount-1, 1, new QTableWidgetItem(portStr));
+    table->setItem(m_rowCount-1, 2, new QTableWidgetItem(protoStr));
     return;
+}
+
+void MainWindow::lockInput()
+{
+    this->m_startAction->setDisabled(true);
+    this->ui->buttonStart->setDisabled(true);
+    this->ui->lineEditIPStart->setDisabled(true);
+    this->ui->lineEditIPEnd->setDisabled(true);
+    this->ui->lineEditPortStart->setDisabled(true);
+    this->ui->lineEditPortEnd->setDisabled(true);
+    this->ui->checkBoxICMP->setDisabled(true);
+    this->ui->checkBoxTCPC->setDisabled(true);
+    this->ui->checkBoxTCPS->setDisabled(true);
+    this->ui->checkBoxTCPF->setDisabled(true);
+}
+
+void MainWindow::freeInput()
+{
+    this->m_startAction->setDisabled(false);
+    this->ui->buttonStart->setDisabled(false);
+    this->ui->lineEditIPStart->setDisabled(false);
+    this->ui->lineEditIPEnd->setDisabled(false);
+    this->ui->lineEditPortStart->setDisabled(false);
+    this->ui->lineEditPortEnd->setDisabled(false);
+    this->ui->checkBoxICMP->setDisabled(false);
+    this->ui->checkBoxTCPC->setDisabled(false);
+    this->ui->checkBoxTCPS->setDisabled(false);
+    this->ui->checkBoxTCPF->setDisabled(false);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete m_supvisor;
 }

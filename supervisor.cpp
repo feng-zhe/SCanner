@@ -16,9 +16,10 @@ Supervisor::Supervisor(QObject *parent) :
 
 void Supervisor::run()
 {
+    // emit the start signal
+    emit signal_start();
     // ***************First : the ping part******************
-    // TO DO: for debug
-    if(1){
+    if(m_bICMP){
     // TO DO: now we just test the IP and id's
     QList<IPID_Info> pdinfo;
     // ip address is in network endain,other ids are in host endian
@@ -57,8 +58,7 @@ void Supervisor::run()
     temp.port = 80;
     temp.seq = 100;
     tcpList.push_back(temp);
-    // TO DO: for the debug
-    if(1){
+    if(m_bTCP_C){
     TCPConnecter *threadPool[5];
     QList<TCP_Info> tcpListTemp(tcpList);
     while(true){
@@ -91,7 +91,7 @@ void Supervisor::run()
     }
 
     // ***************the tcp SYN part********************
-    if(1){
+    if(m_bTCP_S){
     TCP_SF_Sender tcp_sf_sender_s(&tcpList,PROTOCOL_TCP_S);
     TCP_S_Sniffer tcp_s_sniffer(&tcpList);
     connect(&tcp_s_sniffer,&TCP_S_Sniffer::tcp_s_founded,this,&Supervisor::Founded);
@@ -109,7 +109,7 @@ void Supervisor::run()
     }
 
     // ***************the tcp FIN part********************
-    if(1){
+    if(m_bTCP_F){
     TCP_SF_Sender tcp_sf_sender_f(&tcpList,PROTOCOL_TCP_F);
     TCP_F_Sniffer tcp_f_sniffer(&tcpList);
     connect(&tcp_f_sniffer,&TCP_F_Sniffer::tcp_f_founded,this,&Supervisor::Founded);
@@ -127,5 +127,12 @@ void Supervisor::run()
     }
 
     //*************** over ****************
+    emit signal_done(); // emit finish signal
     return;
+}
+
+
+void Supervisor::stop()
+{
+    // TODO:
 }

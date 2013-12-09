@@ -1,5 +1,6 @@
 <RCC>
-    <qresource prefix="/new/prefix1">
+    <qresource prefix="/images">
         <file alias="tool-start">start.png</file>
+        <file alias="tool-stop">stop.png</file>
     </qresource>
 </RCC>

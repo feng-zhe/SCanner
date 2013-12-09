@@ -17,14 +17,21 @@ public:
     ~MainWindow();
 
 public slots:
-    void start();
+    void startScan();
     void addTableItem(unsigned int ip, unsigned short port, unsigned short protocol);
+    void lockInput();   // disable the inputs when supvisor is running
+    void freeInput();   // free the inputs after the supvisor stopped
     
 private:
+    // initialized in initialization list
     Ui::MainWindow *ui;
-    unsigned int rowCount;
-    QAction *startAction;
-    Supervisor *supvisor;   // supervisor who control the procedure of scanning
+    unsigned int m_rowCount;
+    Supervisor *m_supvisor;   // supervisor who control the procedure of scanning
+    // initialized in function body
+    QMenu *m_menu;
+    QToolBar *m_toolBar;
+    QAction *m_stopAction;
+    QAction *m_startAction;
 };
 
 #endif // MAINWINDOW_H
