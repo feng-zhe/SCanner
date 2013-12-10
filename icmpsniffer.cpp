@@ -66,13 +66,14 @@ void ICMPSniffer::run()
         size_ip = IP_SIZE(ip);
         icmp = (struct libnet_icmpv4_hdr*)(packet + LIBNET_ETH_H + size_ip);
         unsigned int ipSource = ip->ip_src.s_addr;
-        unsigned short ipID = ntohs(ip->ip_id);
+        //unsigned short ipID = ntohs(ip->ip_id);
         unsigned short icmpID = ntohs(icmp->hun.echo.id);
         // check whether the packet is corresponding to our sender
         QList<IPID_Info>::iterator start=m_info.begin(), last=m_info.end();
         while(start!=last){
             // check if the response is corresponding to my ping
-            if((*start).ip==ipSource && (*start).IPid==ipID && (*start).ICMPid==icmpID){
+            if((*start).ip==ipSource && //(*start).IPid==ipID && //!!!!!!!!!!!!! sina don't reply the same!
+                    (*start).ICMPid==icmpID){
                 emit pingFounded(ipSource,0,PROTOCOL_ICMP);
                 m_info.erase(start);    // to avoid the duplicate table row same icmp response
                 break;

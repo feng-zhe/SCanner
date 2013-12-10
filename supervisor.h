@@ -14,6 +14,10 @@ public:
 protected:
     void run();
 
+private:
+    void fillICMPInfo();    // (clear first)fill m_icmpInfo according to data member
+    void fillTCPInfo();     // (clear first)fill m_tcpInfo according to data member
+
 signals:
     // some threads find something
     void signal_start();   // supervisor start working

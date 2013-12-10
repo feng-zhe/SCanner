@@ -6,8 +6,10 @@
 #include "tcpsfsender.h"
 #include "tcpssniffer.h"
 #include "tcp_f_sniffer.h"
+#include <netinet/in.h> // for big endian to little endian
 #include <libnet.h>
 #include <QList>
+#include <QTime>
 
 Supervisor::Supervisor(QObject *parent) :
     QThread(parent)
@@ -18,16 +20,11 @@ void Supervisor::run()
 {
     // emit the start signal
     emit signal_start();
-    // no need to clear the infos because they are cleared at the end of run()
     // ***************First : the ping part******************
     if(m_bICMP){
     // ip address is in network endain,other ids are in host endian
-    // make the task info list
-    IPID_Info pdTemp;
-    pdTemp.ip = m_ipStart;
-    pdTemp.ICMPid = 2013;
-    pdTemp.IPid = 2014;
-    m_icmpInfo.push_back(pdTemp);
+    // recreate the information member
+    fillICMPInfo();
     // create the ping sender and receiver
     ICMPSender icmpSend(&m_icmpInfo);
     ICMPSniffer icmpSniff(&m_icmpInfo);
@@ -37,7 +34,7 @@ void Supervisor::run()
     icmpSniff.start();
     icmpSend.start();
     icmpSend.wait();
-    icmpSniff.wait(100);
+    icmpSniff.wait(500);
     // ask sniffer stop(or it gonna runs forever
     icmpSniff.stop();
     // wait until the threads stopped
@@ -47,19 +44,13 @@ void Supervisor::run()
         icmpSniff.wait(100);
     }
 
+    // recreate tcp info when needed
+    if( m_bTCP_C|m_bTCP_S|m_bTCP_F )
+        fillTCPInfo();
     // ***************the tcp connect part********************
-    // TODO: for debug
-    QList<TCP_Info> tcpList;
-    TCP_Info temp;
-    temp.ip = 1306151799;       // baidu
-    //temp.ip = 1711438026;     // sjtu
-    temp.ipID = 2013;
-    temp.port = 80;
-    temp.seq = 100;
-    tcpList.push_back(temp);
     if(m_bTCP_C){
     TCPConnecter *threadPool[5];
-    QList<TCP_Info> tcpListTemp(tcpList);
+    QList<TCP_Info> tcpListTemp(m_tcpInfo);
     while(true){
         QList<TCP_Info>::Iterator start=tcpListTemp.begin(),last=tcpListTemp.end();
         int n = last-start;
@@ -91,8 +82,8 @@ void Supervisor::run()
 
     // ***************the tcp SYN part********************
     if(m_bTCP_S){
-    TCP_SF_Sender tcp_sf_sender_s(&tcpList,PROTOCOL_TCP_S);
-    TCP_S_Sniffer tcp_s_sniffer(&tcpList);
+    TCP_SF_Sender tcp_sf_sender_s(&m_tcpInfo,PROTOCOL_TCP_S);
+    TCP_S_Sniffer tcp_s_sniffer(&m_tcpInfo);
     connect(&tcp_s_sniffer,&TCP_S_Sniffer::tcp_s_founded,this,&Supervisor::Founded);
     tcp_s_sniffer.start();
     tcp_sf_sender_s.start();
@@ -109,8 +100,8 @@ void Supervisor::run()
 
     // ***************the tcp FIN part********************
     if(m_bTCP_F){
-    TCP_SF_Sender tcp_sf_sender_f(&tcpList,PROTOCOL_TCP_F);
-    TCP_F_Sniffer tcp_f_sniffer(&tcpList);
+    TCP_SF_Sender tcp_sf_sender_f(&m_tcpInfo,PROTOCOL_TCP_F);
+    TCP_F_Sniffer tcp_f_sniffer(&m_tcpInfo);
     connect(&tcp_f_sniffer,&TCP_F_Sniffer::tcp_f_founded,this,&Supervisor::Founded);
     tcp_f_sniffer.start();
     tcp_sf_sender_f.start();
@@ -126,12 +117,54 @@ void Supervisor::run()
     }
 
     //*************** over ****************
-    // clear the informations
-    m_icmpInfo.clear();
-    m_tcpInfo.clear();
     // emit finish signal
     emit signal_done();
     return;
+}
+
+void Supervisor::fillICMPInfo()
+{
+    m_icmpInfo.clear();
+    IPID_Info info;
+    uint hipStart = ntohl(m_ipStart);
+    uint hipEnd = ntohl(m_ipEnd);
+    // set the random seed
+    QTime time;
+    time = QTime::currentTime();
+    qsrand(time.msec()+time.second()*1000);
+    while( hipStart<=hipEnd ){
+        info.ip = htonl(hipStart);
+        info.IPid = static_cast<ushort>(qrand());
+        info.ICMPid = static_cast<ushort>(qrand());
+        this->m_icmpInfo.append(info);
+        ++hipStart;
+    }
+}
+
+void Supervisor::fillTCPInfo()
+{
+    m_tcpInfo.clear();
+    TCP_Info info;
+    uint hipStart = ntohl(m_ipStart);
+    uint hipEnd = ntohl(m_ipEnd);
+    ushort port = 0;
+    // set the random seed
+    QTime time;
+    time = QTime::currentTime();
+    qsrand(time.msec()+time.second()*1000);
+    while( hipStart<=hipEnd ){
+        info.ip = htonl(hipStart);
+        port = m_portStart;
+        while( port<=m_portEnd ){
+            info.port = port;
+            info.ipID = static_cast<ushort>(qrand());
+            info.seq = qrand();
+            this->m_tcpInfo.append(info);
+            ++port;
+        }
+        ++hipStart;
+    }
+
 }
 
 
