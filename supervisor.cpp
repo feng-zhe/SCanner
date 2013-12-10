@@ -18,27 +18,26 @@ void Supervisor::run()
 {
     // emit the start signal
     emit signal_start();
+    // no need to clear the infos because they are cleared at the end of run()
     // ***************First : the ping part******************
     if(m_bICMP){
-    // TO DO: now we just test the IP and id's
-    QList<IPID_Info> pdinfo;
     // ip address is in network endain,other ids are in host endian
     // make the task info list
     IPID_Info pdTemp;
-    pdTemp.ip = 1306151799;
+    pdTemp.ip = m_ipStart;
     pdTemp.ICMPid = 2013;
     pdTemp.IPid = 2014;
-    pdinfo.push_back(pdTemp);
+    m_icmpInfo.push_back(pdTemp);
     // create the ping sender and receiver
-    ICMPSender icmpSend(&pdinfo);
-    ICMPSniffer icmpSniff(&pdinfo);
+    ICMPSender icmpSend(&m_icmpInfo);
+    ICMPSniffer icmpSniff(&m_icmpInfo);
     // connect the signals because the main windows can only notice supervisor's signals
     connect(&icmpSniff,&ICMPSniffer::pingFounded,this,&Supervisor::Founded);
     // start the sniffer first
     icmpSniff.start();
     icmpSend.start();
     icmpSend.wait();
-    icmpSniff.wait(1000);
+    icmpSniff.wait(100);
     // ask sniffer stop(or it gonna runs forever
     icmpSniff.stop();
     // wait until the threads stopped
@@ -127,7 +126,11 @@ void Supervisor::run()
     }
 
     //*************** over ****************
-    emit signal_done(); // emit finish signal
+    // clear the informations
+    m_icmpInfo.clear();
+    m_tcpInfo.clear();
+    // emit finish signal
+    emit signal_done();
     return;
 }
 

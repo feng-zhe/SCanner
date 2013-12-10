@@ -52,7 +52,7 @@ void ICMPSniffer::run()
 
     /* now we can start capturing packets */
     struct pcap_pkthdr header;	/* The header that pcap gives us */
-    const struct libnet_ethernet_hdr *ethernet; /* The ethernet header */
+    //const struct libnet_ethernet_hdr *ethernet; /* The ethernet header */
     const struct libnet_ipv4_hdr *ip; /* The IP header */
     const struct libnet_icmpv4_hdr *icmp; /* The ICMP header */
     const u_char *packet;   // the actual packet we picked
@@ -61,7 +61,7 @@ void ICMPSniffer::run()
         packet = pcap_next(handle,&header);
         if( NULL==packet )
             continue;
-        ethernet = (struct libnet_ethernet_hdr*)(packet);
+        //ethernet = (struct libnet_ethernet_hdr*)(packet);
         ip = (struct libnet_ipv4_hdr*)(packet + LIBNET_ETH_H);
         size_ip = IP_SIZE(ip);
         icmp = (struct libnet_icmpv4_hdr*)(packet + LIBNET_ETH_H + size_ip);
@@ -86,39 +86,4 @@ void ICMPSniffer::run()
     pcap_close(handle);
 
     return;
-}
-
-void ICMPSniffer::callBack(u_char *args, const pcap_pkthdr *header, const u_char *packet)
-{
-    ICMPSniffer *pointer = (ICMPSniffer*)args;
-    const struct libnet_ethernet_hdr *ethernet; /* The ethernet header */
-    const struct libnet_ipv4_hdr *ip; /* The IP header */
-    const struct libnet_icmpv4_hdr *icmp; /* The ICMP header */
-    u_int size_ip;
-    ethernet = (struct libnet_ethernet_hdr*)(packet);
-    ip = (struct libnet_ipv4_hdr*)(packet + LIBNET_ETH_H);
-    size_ip = IP_SIZE(ip);
-    icmp = (struct libnet_icmpv4_hdr*)(packet + LIBNET_ETH_H + size_ip);
-    // corresponding to how to store in m_info
-    unsigned int ipSource = ip->ip_src.s_addr;
-    unsigned short ipID = ntohs(ip->ip_id);
-    unsigned short icmpID = ntohs((icmp->hun).echo.id);
-
-    QList<IPID_Info>::iterator start=pointer->m_info.begin(), last=pointer->m_info.end();
-    while(start!=last){
-        // check if the response is corresponding to my ping
-        if((*start).ip==ipSource && (*start).IPid==ipID && (*start).ICMPid==icmpID){
-            pointer->emitPingFounded(ipSource,0,PROTOCOL_ICMP);
-            pointer->m_info.erase(start);    // to avoid the duplicate table row same icmp response
-            break;
-        }
-        ++start;
-    }
-    return;
-}
-
-
-void ICMPSniffer::emitPingFounded(unsigned int ip, unsigned short port, unsigned short protocol)
-{
-    emit pingFounded(ip,port,protocol);
 }

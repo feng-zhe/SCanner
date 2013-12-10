@@ -15,15 +15,9 @@ public:
 protected:
     void run();
 
-private:
-    static void callBack(u_char *args, const struct pcap_pkthdr *header, const u_char *packet);
-
 signals:
     void pingFounded(unsigned int ip, unsigned short port, unsigned short protocol);
     
-public slots:
-    void emitPingFounded(unsigned int ip, unsigned short port, unsigned short protocol);
-
 private:
     QList<IPID_Info> m_info;  // this member is copy of the arg of setInfo
     bool m_stop;
