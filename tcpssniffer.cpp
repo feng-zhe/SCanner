@@ -79,7 +79,7 @@ void TCP_S_Sniffer::run()
         // check whether the packet is corresponding to our sender
         QList<TCP_Info>::iterator start=m_info.begin(), last=m_info.end();
         while(start!=last){
-            if((*start).ip==ipSource && (*start).ipID==ipID &&
+            if((*start).ip==ipSource && //(*start).ipID==ipID &&  // sina don't reply the same ipid
                     (*start).port==sport && (*start).seq==(ack-1)
                     ){
                 emit tcp_s_founded(ipSource,sport,PROTOCOL_TCP_S);
