@@ -2,6 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QLabel>
+#include <QSpacerItem>
 #include "supervisor.h"
 
 namespace Ui {
@@ -32,6 +34,8 @@ private:
     QToolBar *m_toolBar;
     QAction *m_stopAction;
     QAction *m_startAction;
+    QLabel *m_radar;
+    QSpacerItem *m_spacer;
 };
 
 #endif // MAINWINDOW_H

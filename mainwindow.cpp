@@ -10,6 +10,9 @@
 #include <QRegExp>
 #include <QRegExpValidator>
 #include <QMessageBox>
+#include <QLabel>
+#include <QMovie>
+#include <QSpacerItem>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),ui(new Ui::MainWindow),m_rowCount(0),m_supvisor(new Supervisor(this))
@@ -29,6 +32,18 @@ MainWindow::MainWindow(QWidget *parent) :
     m_stopAction->setStatusTip(tr("Stop SCanning"));
     m_menu->addAction(m_stopAction);
     m_toolBar->addAction(m_stopAction);
+    // the radar gif
+    m_radar=new QLabel;
+    QMovie *pm =new QMovie(":/movies/radar-green");
+    pm->start();
+    m_radar->setMovie(pm);
+    m_radar->setScaledContents(true);   // set the label can resize the picture(or label size is fixed)
+    this->ui->verticalLayout_right->addWidget(m_radar);
+    m_radar->setVisible(false);
+    // add a spacer
+    m_spacer=new QSpacerItem(20,40,QSizePolicy::Expanding,QSizePolicy::Expanding);
+    this->ui->verticalLayout_right->addItem(m_spacer);
+
 
     /* initial components */
     // set tableWidget
@@ -76,8 +91,14 @@ void MainWindow::startScan()
         QMessageBox::information( this, tr("Invalid ip address!"),tr("the ip end address is not valid!") );
         return;
     }
+    // if the ip end is 0,set it to the ipstart
+    if( !m_supvisor->m_ipEnd )
+        m_supvisor->m_ipEnd=m_supvisor->m_ipStart;
     m_supvisor->m_portStart = this->ui->lineEditPortStart->text().toUInt();
     m_supvisor->m_portEnd = this->ui->lineEditPortEnd->text().toUInt();
+    // if the end is zero, then set it to the start
+    if( !m_supvisor->m_portEnd )
+        m_supvisor->m_portEnd=m_supvisor->m_portStart;
     m_supvisor->m_bICMP=this->ui->checkBoxICMP->isChecked();
     m_supvisor->m_bTCP_C=this->ui->checkBoxTCPC->isChecked();
     m_supvisor->m_bTCP_S=this->ui->checkBoxTCPS->isChecked();
@@ -132,22 +153,45 @@ void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned sho
 
 void MainWindow::lockInput()
 {
-    // disable the inputs
+    // disable the inputs and hide some of them
     this->m_startAction->setDisabled(true);
     this->ui->buttonStart->setDisabled(true);
     this->ui->lineEditIPStart->setDisabled(true);
+    this->ui->lineEditIPStart->setVisible(false);
     this->ui->lineEditIPEnd->setDisabled(true);
+    this->ui->lineEditIPEnd->setVisible(false);
     this->ui->lineEditPortStart->setDisabled(true);
+    this->ui->lineEditPortStart->setVisible(false);
     this->ui->lineEditPortEnd->setDisabled(true);
+    this->ui->lineEditPortEnd->setVisible(false);
     this->ui->checkBoxICMP->setDisabled(true);
+    this->ui->checkBoxICMP->setVisible(false);
     this->ui->checkBoxTCPC->setDisabled(true);
+    this->ui->checkBoxTCPC->setVisible(false);
     this->ui->checkBoxTCPS->setDisabled(true);
+    this->ui->checkBoxTCPS->setVisible(false);
     this->ui->checkBoxTCPF->setDisabled(true);
-    // TODO:test for picture
+    this->ui->checkBoxTCPF->setVisible(false);
+    this->ui->checkBoxUDP->setDisabled(true);
+    this->ui->checkBoxUDP->setVisible(false);
+    this->ui->label_ipsettings->setVisible(false);
+    this->ui->label_ipstart->setVisible(false);
+    this->ui->label_ipend->setVisible(false);
+    this->ui->label_portsettings->setVisible(false);
+    this->ui->label_portstart->setVisible(false);
+    this->ui->label_portend->setVisible(false);
+    // remove the spacer for appearance
+    this->ui->verticalLayout_right->removeItem(m_spacer);
+    // show the radar
+    m_radar->setVisible(true);
+
 }
 
 void MainWindow::freeInput()
 {
+    // hide radar
+    m_radar->setVisible(false);
+    // free input
     this->m_startAction->setDisabled(false);
     this->ui->buttonStart->setDisabled(false);
     this->ui->lineEditIPStart->setDisabled(false);
@@ -158,10 +202,33 @@ void MainWindow::freeInput()
     this->ui->checkBoxTCPC->setDisabled(false);
     this->ui->checkBoxTCPS->setDisabled(false);
     this->ui->checkBoxTCPF->setDisabled(false);
+    this->ui->checkBoxUDP->setDisabled(false);
+    // show everything
+    this->ui->lineEditIPStart->setVisible(true);
+    this->ui->lineEditIPEnd->setVisible(true);
+    this->ui->lineEditPortStart->setVisible(true);
+    this->ui->lineEditPortEnd->setVisible(true);
+    this->ui->checkBoxICMP->setVisible(true);
+    this->ui->checkBoxTCPC->setVisible(true);
+    this->ui->checkBoxTCPS->setVisible(true);
+    this->ui->checkBoxTCPF->setVisible(true);
+    this->ui->checkBoxUDP->setVisible(true);
+    this->ui->label_ipsettings->setVisible(true);
+    this->ui->label_ipstart->setVisible(true);
+    this->ui->label_ipend->setVisible(true);
+    this->ui->label_portsettings->setVisible(true);
+    this->ui->label_portstart->setVisible(true);
+    this->ui->label_portend->setVisible(true);
+    // add the spacer for appearance
+    this->ui->verticalLayout_right->addItem(m_spacer);
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
     delete m_supvisor;
+    delete m_startAction;
+    delete m_stopAction;
+    delete m_radar;
+    //delete m_spacer;  // needn't to delete because it seems the framework did it for us
 }

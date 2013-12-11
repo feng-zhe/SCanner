@@ -3,4 +3,8 @@
         <file alias="tool-start">start.png</file>
         <file alias="tool-stop">stop.png</file>
     </qresource>
+    <qresource prefix="/movies">
+        <file alias="radar-blue">radar-blue.gif</file>
+        <file alias="radar-green">radar-green.gif</file>
+    </qresource>
 </RCC>
