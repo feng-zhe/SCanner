@@ -6,6 +6,8 @@
 #include "tcpsfsender.h"
 #include "tcpssniffer.h"
 #include "tcp_f_sniffer.h"
+#include "udpsender.h"
+#include "udpsniffer.h"
 #include <netinet/in.h> // for big endian to little endian
 #include <libnet.h>
 #include <QList>
@@ -22,26 +24,26 @@ void Supervisor::run()
     emit signal_start();
     // ***************First : the ping part******************
     if(m_bICMP){
-    // ip address is in network endain,other ids are in host endian
-    // recreate the information member
-    fillICMPInfo();
-    // create the ping sender and receiver
-    ICMPSender icmpSend(&m_icmpInfo);
-    ICMPSniffer icmpSniff(&m_icmpInfo);
-    // connect the signals because the main windows can only notice supervisor's signals
-    connect(&icmpSniff,&ICMPSniffer::pingFounded,this,&Supervisor::Founded);
-    // start the sniffer first
-    icmpSniff.start();
-    icmpSend.start();
-    icmpSend.wait();
-    icmpSniff.wait(500);
-    // ask sniffer stop(or it gonna runs forever
-    icmpSniff.stop();
-    // wait until the threads stopped
-    while(icmpSend.isRunning())
-        icmpSend.wait(100);
-    while(icmpSniff.isRunning())
-        icmpSniff.wait(100);
+        // ip address is in network endain,other ids are in host endian
+        // recreate the information member
+        fillICMPInfo();
+        // create the ping sender and receiver
+        ICMPSender icmpSend(&m_icmpInfo);
+        ICMPSniffer icmpSniff(&m_icmpInfo);
+        // connect the signals because the main windows can only notice supervisor's signals
+        connect(&icmpSniff,&ICMPSniffer::pingFounded,this,&Supervisor::Founded);
+        // start the sniffer first
+        icmpSniff.start();
+        icmpSend.start();
+        icmpSend.wait();
+        icmpSniff.wait(500);
+        // ask sniffer stop(or it gonna runs forever
+        icmpSniff.stop();
+        // wait until the threads stopped
+        while(icmpSend.isRunning())
+            icmpSend.wait(100);
+        while(icmpSniff.isRunning())
+            icmpSniff.wait(100);
     }
 
     // recreate tcp info when needed
@@ -82,38 +84,57 @@ void Supervisor::run()
 
     // ***************the tcp SYN part********************
     if(m_bTCP_S){
-    TCP_SF_Sender tcp_sf_sender_s(&m_tcpInfo,PROTOCOL_TCP_S);
-    TCP_S_Sniffer tcp_s_sniffer(&m_tcpInfo);
-    connect(&tcp_s_sniffer,&TCP_S_Sniffer::tcp_s_founded,this,&Supervisor::Founded);
-    tcp_s_sniffer.start();
-    tcp_sf_sender_s.start();
-    tcp_sf_sender_s.wait(1000);
-    tcp_s_sniffer.wait(2000);
-    // ask threads to stop
-    tcp_s_sniffer.stop();
-    // wait them until they stopped
-    while(tcp_sf_sender_s.isRunning())
-        tcp_sf_sender_s.wait(100);
-    while(tcp_s_sniffer.isRunning())
-        tcp_s_sniffer.wait(100);
+        TCP_SF_Sender tcp_sf_sender_s(&m_tcpInfo,PROTOCOL_TCP_S);
+        TCP_S_Sniffer tcp_s_sniffer(&m_tcpInfo);
+        connect(&tcp_s_sniffer,&TCP_S_Sniffer::tcp_s_founded,this,&Supervisor::Founded);
+        tcp_s_sniffer.start();
+        tcp_sf_sender_s.start();
+        tcp_sf_sender_s.wait(1000);
+        tcp_s_sniffer.wait(2000);
+        // ask threads to stop
+        tcp_s_sniffer.stop();
+        // wait them until they stopped
+        while(tcp_sf_sender_s.isRunning())
+            tcp_sf_sender_s.wait(100);
+        while(tcp_s_sniffer.isRunning())
+            tcp_s_sniffer.wait(100);
     }
 
     // ***************the tcp FIN part********************
     if(m_bTCP_F){
-    TCP_SF_Sender tcp_sf_sender_f(&m_tcpInfo,PROTOCOL_TCP_F);
-    TCP_F_Sniffer tcp_f_sniffer(&m_tcpInfo);
-    connect(&tcp_f_sniffer,&TCP_F_Sniffer::tcp_f_founded,this,&Supervisor::Founded);
-    tcp_f_sniffer.start();
-    tcp_sf_sender_f.start();
-    tcp_sf_sender_f.wait(1000);
-    tcp_f_sniffer.wait(2000);
-    // ask threads to stop
-    tcp_f_sniffer.stop();
-    while(tcp_sf_sender_f.isRunning())
-        tcp_sf_sender_f.wait(100);
-    while(tcp_f_sniffer.isRunning())
-        //wait for the sniffer thread's stop.it's longer because the sendResult()
-        tcp_f_sniffer.wait(100);
+        TCP_SF_Sender tcp_sf_sender_f(&m_tcpInfo,PROTOCOL_TCP_F);
+        TCP_F_Sniffer tcp_f_sniffer(&m_tcpInfo);
+        connect(&tcp_f_sniffer,&TCP_F_Sniffer::tcp_f_founded,this,&Supervisor::Founded);
+        tcp_f_sniffer.start();
+        tcp_sf_sender_f.start();
+        tcp_sf_sender_f.wait(1000);
+        tcp_f_sniffer.wait(2000);
+        // ask threads to stop
+        tcp_f_sniffer.stop();
+        while(tcp_sf_sender_f.isRunning())
+            tcp_sf_sender_f.wait(100);
+        while(tcp_f_sniffer.isRunning())
+            //wait for the sniffer thread's stop.it's longer because the sendResult()
+            tcp_f_sniffer.wait(100);
+    }
+
+    // ***************the UDP part********************
+    if(m_bUDP){
+        fillUDPInfo();
+        UDPSender udpSender(&m_udpInfo);
+        UDPSniffer udpSniffer(&m_udpInfo);
+        connect(&udpSniffer,&UDPSniffer::udp_founded,this,&Supervisor::Founded);
+        udpSniffer.start();
+        udpSender.start();
+        udpSender.wait(1000);
+        udpSniffer.wait(2000);
+        // ask threads to stop
+        udpSniffer.stop();
+        while(udpSender.isRunning())
+            udpSender.wait(100);
+        while(udpSniffer.isRunning())
+            //wait for the sniffer thread's stop.it's longer because the sendResult()
+            udpSniffer.wait(100);
     }
 
     //*************** over ****************
@@ -164,7 +185,30 @@ void Supervisor::fillTCPInfo()
         }
         ++hipStart;
     }
+}
 
+void Supervisor::fillUDPInfo()
+{
+    m_udpInfo.clear();
+    UDP_Info info;
+    uint hipStart = ntohl(m_ipStart);
+    uint hipEnd = ntohl(m_ipEnd);
+    ushort port = 0;
+    // set the random seed
+    QTime time;
+    time = QTime::currentTime();
+    qsrand(time.msec()+time.second()*1000);
+    while( hipStart<=hipEnd ){
+        info.ip = htonl(hipStart);
+        port = m_portStart;
+        while( port<=m_portEnd ){
+            info.port = port;
+            info.ipID = static_cast<ushort>(qrand());
+            this->m_udpInfo.append(info);
+            ++port;
+        }
+        ++hipStart;
+    }
 }
 
 

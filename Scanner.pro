@@ -22,7 +22,9 @@ SOURCES += main.cpp\
     tcpsfsender.cpp \
     tcpssniffer.cpp \
     tcp_f_sniffer.cpp \
-    functions.cpp
+    functions.cpp \
+    udpsender.cpp \
+    udpsniffer.cpp
 
 HEADERS  += mainwindow.h \
     icmpsender.h \
@@ -33,7 +35,9 @@ HEADERS  += mainwindow.h \
     tcpsfsender.h \
     tcpssniffer.h \
     tcp_f_sniffer.h \
-    functions.h
+    functions.h \
+    udpsender.h \
+    udpsniffer.h
 
 FORMS    += mainwindow.ui
 

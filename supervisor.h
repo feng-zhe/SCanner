@@ -17,6 +17,7 @@ protected:
 private:
     void fillICMPInfo();    // (clear first)fill m_icmpInfo according to data member
     void fillTCPInfo();     // (clear first)fill m_tcpInfo according to data member
+    void fillUDPInfo();     // (clear first)fill m_tcpInfo according to data member
 
 signals:
     // some threads find something
@@ -32,6 +33,7 @@ public:
     bool m_bTCP_C;  // indicate whether use tcp_c scanning
     bool m_bTCP_S;  // indicate whether use TCP SYN scanning
     bool m_bTCP_F;  // indicate whether use TCP FIN scanning
+    bool m_bUDP;    // indicate whether use UDP scanning
     uint m_ipStart;
     uint m_ipEnd;
     ushort m_portStart;
@@ -39,6 +41,7 @@ public:
 private:
     QList<IPID_Info> m_icmpInfo;
     QList<TCP_Info> m_tcpInfo;
+    QList<UDP_Info> m_udpInfo;
     QString m_dev;  // the device name
 };
 

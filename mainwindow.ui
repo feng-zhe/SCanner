@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>616</width>
-    <height>399</height>
+    <width>679</width>
+    <height>468</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -138,7 +138,7 @@
           </property>
          </widget>
         </item>
-        <item>
+        <item alignment="Qt::AlignVCenter">
          <widget class="QCheckBox" name="checkBoxTCPC">
           <property name="text">
            <string>TCP CONNECT</string>
@@ -156,6 +156,13 @@
          <widget class="QCheckBox" name="checkBoxTCPF">
           <property name="text">
            <string>TCP FIN</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="checkBoxUDP">
+          <property name="text">
+           <string>UDP</string>
           </property>
          </widget>
         </item>
@@ -204,7 +211,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>616</width>
+     <width>679</width>
      <height>25</height>
     </rect>
    </property>

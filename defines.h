@@ -9,6 +9,7 @@ const unsigned short PROTOCOL_ICMP = 0;
 const unsigned short PROTOCOL_TCP_F = 1;    // occationally the same value on tcp header
 const unsigned short PROTOCOL_TCP_S = 2;    // occationally the same value on tcp header
 const unsigned short PROTOCOL_TCP_C = 3;
+const unsigned short PROTOCOL_UDP = 4;
 
 // the struct contain informations of IP and ID when ping
 typedef struct _IPID_Info{
@@ -24,6 +25,13 @@ typedef struct _TCP_Info{
     unsigned short port;
     unsigned int seq;
 } TCP_Info;
+
+// the struct for udp scan
+typedef struct _UDP_Info{
+    unsigned int ip;
+    unsigned short ipID;
+    unsigned short port;
+} UDP_Info;
 
 
 #endif // DEFINES_H

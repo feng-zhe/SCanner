@@ -82,6 +82,7 @@ void MainWindow::startScan()
     m_supvisor->m_bTCP_C=this->ui->checkBoxTCPC->isChecked();
     m_supvisor->m_bTCP_S=this->ui->checkBoxTCPS->isChecked();
     m_supvisor->m_bTCP_F=this->ui->checkBoxTCPF->isChecked();
+    m_supvisor->m_bUDP=this->ui->checkBoxUDP->isChecked();
     // start supvisor
     m_supvisor->start();
 }
@@ -116,6 +117,9 @@ void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned sho
     case PROTOCOL_TCP_F:
         protoStr="TCP_F";
         break;
+    case PROTOCOL_UDP:
+        protoStr="UDP";
+        break;
     default:
         break;
     }
@@ -128,6 +132,7 @@ void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned sho
 
 void MainWindow::lockInput()
 {
+    // disable the inputs
     this->m_startAction->setDisabled(true);
     this->ui->buttonStart->setDisabled(true);
     this->ui->lineEditIPStart->setDisabled(true);
@@ -138,6 +143,7 @@ void MainWindow::lockInput()
     this->ui->checkBoxTCPC->setDisabled(true);
     this->ui->checkBoxTCPS->setDisabled(true);
     this->ui->checkBoxTCPF->setDisabled(true);
+    // TODO:test for picture
 }
 
 void MainWindow::freeInput()
