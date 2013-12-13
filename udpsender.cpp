@@ -10,7 +10,7 @@ UDPSender::UDPSender(const QList<UDP_Info> *info, QObject *parent) :
 
 void UDPSender::run()
 {
-    QList<UDP_Info>::const_iterator start = m_info->constBegin(),
+    auto start = m_info->constBegin(),
             last = m_info->constEnd();
     while( start!=last ){
         UDP_Info temp=*start;
@@ -25,7 +25,8 @@ void UDPSender::run()
 int UDPSender::udp(uint destip, ushort ipID, ushort dport, ushort sport)
 {
     // TODO : now we use the fixed ethernet,we will do something to make it find ethernet by itself
-    const char *dev = "eth1";
+    char dev[DEV_MAX] ;			/* set device name */
+    strcpy(dev,global_dev);
     libnet_t *l = NULL;
     libnet_ptag_t packetTag;		// the tag return by some build functions
     char errBuff[LIBNET_ERRBUF_SIZE] = {0};

@@ -82,7 +82,7 @@ void TCP_F_Sniffer::run()
         unsigned short sport = ntohs(tcp->th_sport);
         unsigned int ack = ntohl(tcp->th_ack);      // should be our sending packet's seq+1
         // check whether the packet is corresponding to our sender
-        QList<TCP_Info>::iterator start=m_info.begin(), last=m_info.end();
+        auto start=m_info.begin(), last=m_info.end();
         while(start!=last){
             if((*start).ip==ipSource && //(*start).ipID==ipID && // some computer don't reply the id(tested)
                     (*start).port==sport && (*start).seq==(ack-1)
@@ -103,7 +103,7 @@ void TCP_F_Sniffer::run()
 
 void TCP_F_Sniffer::sendResult()
 {
-    QList<TCP_Info>::ConstIterator start=m_info.constBegin(),last=m_info.constEnd();
+    auto start=m_info.constBegin(),last=m_info.constEnd();
     while(start!=last){
         const TCP_Info &temp = *start;
         emit tcp_f_founded(temp.ip,temp.port,PROTOCOL_TCP_F);

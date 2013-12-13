@@ -26,7 +26,8 @@ int ICMPSender::ping(unsigned int dest,unsigned short ICMPid,unsigned short IPid
 {
     // TO DO : now we use the fixed ethernet,we will do something to make it find ethernet by itself
     // eth1 is my wireless ethernet card
-    const char *dev = "eth1";
+    char dev[DEV_MAX] ;			/* set device name */
+    strcpy(dev,global_dev);
     libnet_t *l = NULL;
     char errBuff[LIBNET_ERRBUF_SIZE] = {0};
     // first is to initilize the library and create the envirnoment

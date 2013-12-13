@@ -18,7 +18,8 @@ void TCP_S_Sniffer::stop()
 void TCP_S_Sniffer::run()
 {
     // TODO: further upgrade is to find the device by itself
-    char dev[] = "eth1";			/* capture device name */
+    char dev[DEV_MAX] ;			/* set device name */
+    strcpy(dev,global_dev);
     char errbuf[PCAP_ERRBUF_SIZE];		/* error buffer */
     /* find a capture device if not specified on command-line */
     //dev = pcap_lookupdev(errbuf);
@@ -77,7 +78,7 @@ void TCP_S_Sniffer::run()
         unsigned short sport = ntohs(tcp->th_sport);
         unsigned int ack = ntohl(tcp->th_ack);
         // check whether the packet is corresponding to our sender
-        QList<TCP_Info>::iterator start=m_info.begin(), last=m_info.end();
+        auto start=m_info.begin(), last=m_info.end();
         while(start!=last){
             if((*start).ip==ipSource && //(*start).ipID==ipID &&  // sina don't reply the same ipid
                     (*start).port==sport && (*start).seq==(ack-1)

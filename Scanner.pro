@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     tcp_f_sniffer.cpp \
     functions.cpp \
     udpsender.cpp \
-    udpsniffer.cpp
+    udpsniffer.cpp \
+    devicemaster.cpp
 
 HEADERS  += mainwindow.h \
     icmpsender.h \
@@ -37,7 +38,8 @@ HEADERS  += mainwindow.h \
     tcp_f_sniffer.h \
     functions.h \
     udpsender.h \
-    udpsniffer.h
+    udpsniffer.h \
+    devicemaster.h
 
 FORMS    += mainwindow.ui
 
@@ -46,3 +48,6 @@ RESOURCES += \
 
 LIBS += -lnet
 LIBS += -L/usr/local/lib -lpcap
+# for C++11
+QMAKE_CXXFLAGS += -std=c++11
+CONFIG += c++11

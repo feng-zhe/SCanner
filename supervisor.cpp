@@ -8,8 +8,11 @@
 #include "tcp_f_sniffer.h"
 #include "udpsender.h"
 #include "udpsniffer.h"
+#include "devicemaster.h"
 #include <netinet/in.h> // for big endian to little endian
 #include <libnet.h>
+#include <QString>
+#include <QByteArray>
 #include <QList>
 #include <QTime>
 
@@ -22,6 +25,13 @@ void Supervisor::run()
 {
     // emit the start signal
     emit signal_start();
+    // ***************Zero : set network device name***************
+    DeviceMaster devmaster;
+    QString devName = devmaster.getDeviceName();
+    QByteArray ba = devName.toLatin1();
+    // copy the name to global variable globel_dev used by any class which need libnet or libpcap
+    strcpy(global_dev,ba.data());
+
     // ***************First : the ping part******************
     if(m_bICMP){
         // ip address is in network endain,other ids are in host endian
@@ -54,7 +64,7 @@ void Supervisor::run()
     TCPConnecter *threadPool[5];
     QList<TCP_Info> tcpListTemp(m_tcpInfo);
     while(true){
-        QList<TCP_Info>::Iterator start=tcpListTemp.begin(),last=tcpListTemp.end();
+        auto start=tcpListTemp.begin(),last=tcpListTemp.end();
         int n = last-start;
         if (!n) // no tasks
             break;
@@ -72,9 +82,11 @@ void Supervisor::run()
         while(j){
             --j;
             threadPool[j]->start();
-            threadPool[j]->wait(1000);
-            disconnect(threadPool[j],&TCPConnecter::tcpcFounded,this,&Supervisor::Founded);
+            threadPool[j]->wait(1500);
             threadPool[j]->exit();
+            while(threadPool[j]->isRunning())
+                threadPool[j]->wait(100);
+            disconnect(threadPool[j],&TCPConnecter::tcpcFounded,this,&Supervisor::Founded);
             delete threadPool[j];
         }
         // remove the task we've dealed from list

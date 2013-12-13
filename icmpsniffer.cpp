@@ -1,4 +1,5 @@
 #include "icmpsniffer.h"
+#include "defines.h"
 #include <libnet.h>
 #include <QList>
 #include <netinet/in.h> // for big endian to little endian
@@ -17,7 +18,8 @@ void ICMPSniffer::stop()
 
 void ICMPSniffer::run()
 {
-    char dev[] = "eth1";			/* capture device name */
+    char dev[DEV_MAX] ;			/* set device name */
+    strcpy(dev,global_dev);
     char errbuf[PCAP_ERRBUF_SIZE];		/* error buffer */
     /* find a capture device if not specified by dev */
     //dev = pcap_lookupdev(errbuf);

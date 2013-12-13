@@ -9,7 +9,7 @@ TCP_SF_Sender::TCP_SF_Sender(QList<TCP_Info> *info, unsigned int protocol, QObje
 
 void TCP_SF_Sender::run()
 {
-    QList<TCP_Info>::const_iterator start = m_info->constBegin(),
+    auto start = m_info->constBegin(),
             last = m_info->constEnd();
     while( start!=last ){
         TCP_Info temp=*start;
@@ -36,7 +36,8 @@ void TCP_SF_Sender::run()
 int TCP_SF_Sender::tcpSF(unsigned int destip, unsigned short dport,unsigned int seq, unsigned int control, unsigned short IPid)
 {
     // TODO : now we use the fixed ethernet,we will do something to make it find ethernet by itself
-    const char *dev = "eth1";
+    char dev[DEV_MAX] ;			/* set device name */
+    strcpy(dev,global_dev);
     libnet_t *l = NULL;
     libnet_ptag_t packetTag;		// the tag return by some build functions
     char errBuff[LIBNET_ERRBUF_SIZE] = {0};

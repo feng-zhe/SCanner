@@ -19,7 +19,8 @@ void UDPSniffer::stop()
 void UDPSniffer::run()
 {
     // TODO: further upgrade is to find the device by itself
-    char dev[] = "eth1";			/* capture device name */
+    char dev[DEV_MAX] ;			/* set device name */
+    strcpy(dev,global_dev);
     char errbuf[PCAP_ERRBUF_SIZE];		/* error buffer */
     /* find a capture device if not specified on command-line */
     //dev = pcap_lookupdev(errbuf);
@@ -79,7 +80,7 @@ void UDPSniffer::run()
         unsigned int ipSource = ip->ip_src.s_addr;
         //unsigned short ipID = ntohs(ip->ip_id);
         // check whether the packet is corresponding to our sender
-        QList<UDP_Info>::iterator start=m_info.begin(), last=m_info.end();
+        auto start=m_info.begin(), last=m_info.end();
         while(start!=last){
             if((*start).ip==ipSource){// except the ip, nothing can be checked(ipID is not same sometimes)
                 // then this port is not open, erase it.
@@ -98,7 +99,7 @@ void UDPSniffer::run()
 
 void UDPSniffer::sendResult()
 {
-    QList<UDP_Info>::ConstIterator start=m_info.constBegin(),last=m_info.constEnd();
+    auto start=m_info.constBegin(),last=m_info.constEnd();
     while(start!=last){
         const UDP_Info &temp = *start;
         emit udp_founded(temp.ip,temp.port,PROTOCOL_UDP);

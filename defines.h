@@ -4,6 +4,10 @@
 #define IP_SIZE(ip) ((((ip)->ip_hl) & 0x0f)*4)
 const int SNAP_LEN = 1518;
 
+// define device name buff
+const unsigned short DEV_MAX = 255; // the max length of device name
+extern char global_dev[DEV_MAX];  // declare the dev_name variable
+
 // define the protocol types
 const unsigned short PROTOCOL_ICMP = 0;
 const unsigned short PROTOCOL_TCP_F = 1;    // occationally the same value on tcp header
