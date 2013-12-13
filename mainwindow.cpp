@@ -44,7 +44,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_spacer=new QSpacerItem(20,40,QSizePolicy::Expanding,QSizePolicy::Expanding);
     this->ui->verticalLayout_right->addItem(m_spacer);
 
-
     /* initial components */
     // set tableWidget
     ui->tableResult->setColumnCount(3);
@@ -52,6 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QStringList headers;
     headers << "IP" << "PORT" << "PROTOCOL";
     ui->tableResult->setHorizontalHeaderLabels(headers);
+    ui->tableResult->setEditTriggers(QAbstractItemView::NoEditTriggers); // not editable
+    ui->tableResult->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);// only for qt5.0+
+
     // set ip line editor
     QRegExp regExpIP("((2[0-4]\\d|25[0-5]|[01]?\\d\\d?)\\.){3}(2[0-4]\\d|25[0-5]|[01]?\\d\\d?)");
     ui->lineEditIPStart->setValidator(new QRegExpValidator(regExpIP,this));
@@ -111,7 +113,7 @@ void MainWindow::startScan()
 void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned short protocol)
 {
     // make an alias for convinience
-    QTableWidget * (&table) = this->ui->tableResult;
+    QTableWidget * &table = this->ui->tableResult;
     // add the rowCount
     this->m_rowCount++;
     // dynamically set the rowCount
@@ -123,31 +125,43 @@ void MainWindow::addTableItem(unsigned int ip, unsigned short port, unsigned sho
             QString::number(uint(*(p+3)));
     QString portStr = QString::number(port);
     QString protoStr;
+    Qt::GlobalColor itemColor;
     switch (protocol)
     {
     case PROTOCOL_ICMP:
         protoStr="ICMP";
-        portStr = "NULL";
+        portStr = "NULL";   // icmp doesn't have a port
+        itemColor=Qt::cyan;
         break;
     case PROTOCOL_TCP_C:
         protoStr="TCP_C";
+        itemColor=Qt::yellow;
         break;
     case PROTOCOL_TCP_S:
         protoStr="TCP_S";
+        itemColor=Qt::green;
         break;
     case PROTOCOL_TCP_F:
         protoStr="TCP_F";
+        itemColor=Qt::lightGray;
         break;
     case PROTOCOL_UDP:
         protoStr="UDP";
+        itemColor=Qt::darkGray;
         break;
     default:
         break;
     }
     // add it to the table widget
-    table->setItem(m_rowCount-1, 0, new QTableWidgetItem(ipStr));
-    table->setItem(m_rowCount-1, 1, new QTableWidgetItem(portStr));
-    table->setItem(m_rowCount-1, 2, new QTableWidgetItem(protoStr));
+    QTableWidgetItem *pItem = new QTableWidgetItem(ipStr);
+    pItem->setBackgroundColor(QColor(itemColor));
+    table->setItem(m_rowCount-1, 0, pItem);
+    pItem = new QTableWidgetItem(portStr);
+    pItem->setBackgroundColor(QColor(itemColor));
+    table->setItem(m_rowCount-1, 1, pItem);
+    pItem = new QTableWidgetItem(protoStr);
+    pItem->setBackgroundColor(QColor(itemColor));
+    table->setItem(m_rowCount-1, 2, pItem);
     return;
 }
 
