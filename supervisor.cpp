@@ -17,14 +17,16 @@
 #include <QTime>
 
 Supervisor::Supervisor(QObject *parent) :
-    QThread(parent)
+    QThread(parent),m_bStop(false)
 {
+    connect(this,&Supervisor::signal_stop,this,&Supervisor::stop);
 }
 
 void Supervisor::run()
 {
-    // emit the start signal
+    // emit the start signal and reset m_bStop
     emit signal_start();
+    m_bStop = false;
     // ***************Zero : set network device name***************
     DeviceMaster devmaster;
     QString devName = devmaster.getDeviceName();
@@ -33,7 +35,7 @@ void Supervisor::run()
     strcpy(global_dev,ba.data());
 
     // ***************First : the ping part******************
-    if(m_bICMP){
+    if( m_bICMP && !m_bStop ){
         // ip address is in network endain,other ids are in host endian
         // recreate the information member
         fillICMPInfo();
@@ -42,11 +44,12 @@ void Supervisor::run()
         ICMPSniffer icmpSniff(&m_icmpInfo);
         // connect the signals because the main windows can only notice supervisor's signals
         connect(&icmpSniff,&ICMPSniffer::pingFounded,this,&Supervisor::Founded);
+        connect(this,&Supervisor::signal_stop,&icmpSniff,&ICMPSniffer::stop);
         // start the sniffer first
         icmpSniff.start();
         icmpSend.start();
         icmpSend.wait();
-        icmpSniff.wait(500);
+        icmpSniff.wait(500*m_icmpInfo.length());    // wait for 500ms every icmp test
         // ask sniffer stop(or it gonna runs forever
         icmpSniff.stop();
         // wait until the threads stopped
@@ -60,13 +63,16 @@ void Supervisor::run()
     if( m_bTCP_C|m_bTCP_S|m_bTCP_F )
         fillTCPInfo();
     // ***************the tcp connect part********************
-    if(m_bTCP_C){
+    if( m_bTCP_C && !m_bStop ){
     TCPConnecter *threadPool[5];
     QList<TCP_Info> tcpListTemp(m_tcpInfo);
     while(true){
         auto start=tcpListTemp.begin(),last=tcpListTemp.end();
         int n = last-start;
-        if (!n) // no tasks
+        if(!n) // no tasks
+            break;
+        // supvisor is asked to stop
+        if(m_bStop)
             break;
         n = n>5 ? 5 : n;
         // create enough threads
@@ -82,11 +88,12 @@ void Supervisor::run()
         while(j){
             --j;
             threadPool[j]->start();
-            threadPool[j]->wait(1500);
+            threadPool[j]->wait(1500);  // it will take longer for tcp connection
             threadPool[j]->exit();
             while(threadPool[j]->isRunning())
                 threadPool[j]->wait(100);
-            disconnect(threadPool[j],&TCPConnecter::tcpcFounded,this,&Supervisor::Founded);
+            //needn't disconnect since Qt do it for us if the object is deleted
+            //disconnect(threadPool[j],&TCPConnecter::tcpcFounded,this,&Supervisor::Founded);
             delete threadPool[j];
         }
         // remove the task we've dealed from list
@@ -95,14 +102,15 @@ void Supervisor::run()
     }
 
     // ***************the tcp SYN part********************
-    if(m_bTCP_S){
+    if( m_bTCP_S && !m_bStop ){
         TCP_SF_Sender tcp_sf_sender_s(&m_tcpInfo,PROTOCOL_TCP_S);
         TCP_S_Sniffer tcp_s_sniffer(&m_tcpInfo);
         connect(&tcp_s_sniffer,&TCP_S_Sniffer::tcp_s_founded,this,&Supervisor::Founded);
+        connect(this,&Supervisor::signal_stop,&tcp_s_sniffer,&TCP_S_Sniffer::stop);
         tcp_s_sniffer.start();
         tcp_sf_sender_s.start();
-        tcp_sf_sender_s.wait(1000);
-        tcp_s_sniffer.wait(2000);
+        tcp_sf_sender_s.wait();
+        tcp_s_sniffer.wait(1000*m_tcpInfo.length());
         // ask threads to stop
         tcp_s_sniffer.stop();
         // wait them until they stopped
@@ -113,14 +121,15 @@ void Supervisor::run()
     }
 
     // ***************the tcp FIN part********************
-    if(m_bTCP_F){
+    if( m_bTCP_F && !m_bStop ){
         TCP_SF_Sender tcp_sf_sender_f(&m_tcpInfo,PROTOCOL_TCP_F);
         TCP_F_Sniffer tcp_f_sniffer(&m_tcpInfo);
         connect(&tcp_f_sniffer,&TCP_F_Sniffer::tcp_f_founded,this,&Supervisor::Founded);
+        connect(this,&Supervisor::signal_stop,&tcp_f_sniffer,&TCP_F_Sniffer::stop);
         tcp_f_sniffer.start();
         tcp_sf_sender_f.start();
-        tcp_sf_sender_f.wait(1000);
-        tcp_f_sniffer.wait(2000);
+        tcp_sf_sender_f.wait();
+        tcp_f_sniffer.wait(1000*m_tcpInfo.length());
         // ask threads to stop
         tcp_f_sniffer.stop();
         while(tcp_sf_sender_f.isRunning())
@@ -131,15 +140,16 @@ void Supervisor::run()
     }
 
     // ***************the UDP part********************
-    if(m_bUDP){
+    if( m_bUDP && !m_bStop ){
         fillUDPInfo();
         UDPSender udpSender(&m_udpInfo);
         UDPSniffer udpSniffer(&m_udpInfo);
         connect(&udpSniffer,&UDPSniffer::udp_founded,this,&Supervisor::Founded);
+        connect(this,&Supervisor::signal_stop,&udpSniffer,&UDPSniffer::stop);
         udpSniffer.start();
         udpSender.start();
-        udpSender.wait(1000);
-        udpSniffer.wait(2000);
+        udpSender.wait();
+        udpSniffer.wait(1000*m_udpInfo.length());
         // ask threads to stop
         udpSniffer.stop();
         while(udpSender.isRunning())
@@ -226,5 +236,5 @@ void Supervisor::fillUDPInfo()
 
 void Supervisor::stop()
 {
-    // TODO:
+    m_bStop = true;
 }

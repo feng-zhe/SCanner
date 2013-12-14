@@ -10,10 +10,12 @@ class ICMPSniffer : public QThread
     Q_OBJECT
 public:
     explicit ICMPSniffer(const QList<IPID_Info> *info,QObject *parent = 0);
-    void stop();
 
 protected:
     void run();
+
+public slots:
+    void stop();
 
 signals:
     void pingFounded(unsigned int ip, unsigned short port, unsigned short protocol);

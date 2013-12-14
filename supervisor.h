@@ -24,6 +24,7 @@ signals:
     void signal_start();   // supervisor start working
     void Founded(unsigned int ip, unsigned short port, unsigned short protocol);
     void signal_done();    // accomplish all tasks
+    void signal_stop();    // ask supvisor to stop
     
 public slots:
     void stop();    // ask supervisor to stop
@@ -34,6 +35,7 @@ public:
     bool m_bTCP_S;  // indicate whether use TCP SYN scanning
     bool m_bTCP_F;  // indicate whether use TCP FIN scanning
     bool m_bUDP;    // indicate whether use UDP scanning
+    bool m_bStop;   // true if we want to stop the supvisor
     uint m_ipStart;
     uint m_ipEnd;
     ushort m_portStart;

@@ -68,13 +68,13 @@ MainWindow::MainWindow(QWidget *parent) :
     /* connect signals and slots */
     //action to startScan and supervisor::stop
     connect(m_startAction, &QAction::triggered, this, &MainWindow::startScan);
-    connect(m_stopAction, &QAction::triggered, m_supvisor, &Supervisor::stop);
+    connect(m_stopAction, &QAction::triggered, m_supvisor, &Supervisor::signal_stop);
     //buttonStart to startScan
     connect(this->ui->buttonStart,&QPushButton::clicked,this,&MainWindow::startScan);
     //Found to addTableItem
     connect(this->m_supvisor,&Supervisor::Founded,this,&MainWindow::addTableItem);
     // signals between MainWindows and supvisor
-    connect(this->ui->buttonStop,&QPushButton::clicked,this->m_supvisor,&Supervisor::stop);// stop
+    connect(this->ui->buttonStop,&QPushButton::clicked,this->m_supvisor,&Supervisor::signal_stop);// stop
     connect(this->m_supvisor,&Supervisor::signal_start,this,&MainWindow::lockInput);  // lock input
     connect(this->m_supvisor,&Supervisor::signal_done,this,&MainWindow::freeInput);   // free input
 }

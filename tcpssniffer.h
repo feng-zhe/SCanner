@@ -9,7 +9,6 @@ class TCP_S_Sniffer : public QThread
     Q_OBJECT
 public:
     explicit TCP_S_Sniffer(const QList<TCP_Info> *info, QObject *parent= 0);
-    void stop();
     
 signals:
     void tcp_s_founded(unsigned int ip, unsigned short port, unsigned short protocol);
@@ -18,6 +17,7 @@ protected:
     void run();
 
 public slots:
+    void stop();
     
 private:
     QList<TCP_Info> m_info;

@@ -13,7 +13,6 @@ class UDPSniffer : public QThread
     Q_OBJECT
 public:
     explicit UDPSniffer(const QList<UDP_Info>*info, QObject *parent = 0);
-    void stop();
 
 signals:
     void udp_founded(unsigned int ip, unsigned short port, unsigned short protocol);
@@ -25,6 +24,7 @@ private:
     void sendResult();
 
 public slots:
+    void stop();
 
 private:
     QList<UDP_Info> m_info;
